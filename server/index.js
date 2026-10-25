@@ -1,14 +1,25 @@
-
+require("dotenv").config();
 const express = require("express");
+const cors = require("cors");
+const connectDB = require("./config/db");
+const app = express();
 
-const app = express()
+app.use(cors());
+app.use(express.json());
 
-app.get("/", (req, res)=>{
-   res.status(200).send("ServicePro Server is Running ");
-
+app.get("/api/health", (req, res) => {
+  res.json({ ok: true, message: "ServicePro server running" });
 });
 
-app.listen(5000,()=>{
-    console.log("server running on port 5000");
-});
+app.use("/api/auth", require("./dev-stubs/devAuthRoutes"));
 
+const PORT = process.env.PORT || 5000;
+connectDB()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error("Database connection failed:", err.message);
+  });
