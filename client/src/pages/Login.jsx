@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { Navigate, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import {
   FiMail,
   FiLock,
@@ -14,6 +16,9 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const { user, login } = useAuth();
+const navigate = useNavigate();
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -32,9 +37,20 @@ export default function Login() {
 
     setLoading(true);
     
-    console.log("login payload", form);
-    setTimeout(() => setLoading(false), 1000);
+   try {
+  await login(form.email, form.password);
+  navigate("/", { replace: true });
+} catch (err) {
+  setError(
+    err.response?.data?.message ||
+      (err.request ? "Cannot reach the server" : err.message)
+  );
+} finally {
+  setLoading(false);
+}
   };
+
+if (user) return <Navigate to="/" replace />;
 
   return (
     <div className="mx-auto flex min-h-screen max-w-md flex-col bg-ink">
